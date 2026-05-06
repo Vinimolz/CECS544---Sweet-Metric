@@ -3,6 +3,7 @@ package io;
 import model.FunctionPointData;
 import model.Language;
 import model.Project;
+import model.UseCasePointData;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -50,7 +51,46 @@ public class ProjectFileManager {
 
             // FP result
             writer.write("FP_RESULT=" + data.getFunctionPoints()); writer.newLine();
+            writer.write("CODE_SIZE=" + data.getCodeSize()); writer.newLine();
             writer.newLine(); // blank line between panes
+        }
+
+        // Save UCP panes
+        for (UseCasePointData data : project.getUseCasePointDataList()) {
+            writer.write("UCP_PANE="         + data.getPaneName());       writer.newLine();
+            writer.write("SIMPLE_UC="        + data.getSimpleUseCases()); writer.newLine();
+            writer.write("AVERAGE_UC="       + data.getAverageUseCases());writer.newLine();
+            writer.write("COMPLEX_UC="       + data.getComplexUseCases());writer.newLine();
+            writer.write("SIMPLE_ACTOR="     + data.getSimpleActors());   writer.newLine();
+            writer.write("AVERAGE_ACTOR="    + data.getAverageActors());  writer.newLine();
+            writer.write("COMPLEX_ACTOR="    + data.getComplexActors());  writer.newLine();
+            writer.write("PROD_FACTOR="      + data.getProductivityFactor()); writer.newLine();
+            writer.write("LOC_PM="           + data.getLocPerPM());       writer.newLine();
+            writer.write("LOC_UCP="          + data.getLocPerUCP());      writer.newLine();
+
+            // TCF ratings as comma separated
+            double[] tcf = data.getTcfRatings();
+            StringBuilder tcfLine = new StringBuilder("TCF_RATINGS=");
+            for (int i = 0; i < tcf.length; i++) {
+                tcfLine.append(tcf[i]);
+                if (i < tcf.length - 1) tcfLine.append(",");
+            }
+            writer.write(tcfLine.toString()); writer.newLine();
+
+            // ECF ratings as comma separated
+            double[] ecf = data.getEcfRatings();
+            StringBuilder ecfLine = new StringBuilder("ECF_RATINGS=");
+            for (int i = 0; i < ecf.length; i++) {
+                ecfLine.append(ecf[i]);
+                if (i < ecf.length - 1) ecfLine.append(",");
+            }
+            writer.write(ecfLine.toString()); writer.newLine();
+
+            writer.write("TOTAL_UCP="   + data.getTotalUCP());        writer.newLine();
+            writer.write("EST_HOURS="   + data.getEstimatedHours());  writer.newLine();
+            writer.write("EST_LOC="     + data.getEstimatedLOC());    writer.newLine();
+            writer.write("EST_PM="      + data.getEstimatedPM());     writer.newLine();
+            writer.newLine();
         }
 
         writer.close();
@@ -66,114 +106,182 @@ public class ProjectFileManager {
         String creator     = "";
         String comments    = "";
 
-        List<FunctionPointData> panes = new ArrayList<>();
-        FunctionPointData currentPane = null;
+        List<FunctionPointData>  fpPanes  = new ArrayList<>();
+        List<UseCasePointData>   ucpPanes = new ArrayList<>();
+
+        FunctionPointData  currentFP  = null;
+        UseCasePointData   currentUCP = null;
 
         String line;
         while ((line = reader.readLine()) != null) {
             line = line.trim();
             if (line.isEmpty()) continue;
 
-            String[] parts = line.split("=", 2); // split on first = only
+            String[] parts = line.split("=", 2);
             if (parts.length < 2) continue;
 
             String key   = parts[0].trim();
             String value = parts[1].trim();
 
             switch (key) {
-                // Project level
+                // --- Project level ---
                 case "PROJECT_NAME": projectName = value; break;
                 case "PRODUCT_NAME": productName = value; break;
                 case "CREATOR":      creator     = value; break;
                 case "COMMENTS":     comments    = value; break;
                 case "LANGUAGE":
-                    // Restore language - "None" means no language selected
                     if (!value.equals("None")) {
                         language.setSelectedLanguage(value);
                     }
                     break;
 
-                // Pane level - new pane starts here
+                // --- FP pane start ---
                 case "PANE":
-                    currentPane = new FunctionPointData(value);
-                    panes.add(currentPane);
+                    currentFP  = new FunctionPointData(value);
+                    currentUCP = null;
+                    fpPanes.add(currentFP);
                     break;
 
-                // FP counts
+                // --- FP fields ---
                 case "EI":
-                    if (currentPane != null)
-                        currentPane.setExternalInputs(Integer.parseInt(value));
+                    if (currentFP != null)
+                        currentFP.setExternalInputs(Integer.parseInt(value));
                     break;
                 case "EO":
-                    if (currentPane != null)
-                        currentPane.setExternalOutputs(Integer.parseInt(value));
+                    if (currentFP != null)
+                        currentFP.setExternalOutputs(Integer.parseInt(value));
                     break;
                 case "EQ":
-                    if (currentPane != null)
-                        currentPane.setExternalInquiries(Integer.parseInt(value));
+                    if (currentFP != null)
+                        currentFP.setExternalInquiries(Integer.parseInt(value));
                     break;
                 case "ILF":
-                    if (currentPane != null)
-                        currentPane.setInternalLogical(Integer.parseInt(value));
+                    if (currentFP != null)
+                        currentFP.setInternalLogical(Integer.parseInt(value));
                     break;
                 case "EIF":
-                    if (currentPane != null)
-                        currentPane.setExternalInterface(Integer.parseInt(value));
+                    if (currentFP != null)
+                        currentFP.setExternalInterface(Integer.parseInt(value));
                     break;
-
-                // Weighting factors
                 case "WEIGHT_EI":
-                    if (currentPane != null)
-                        currentPane.setWeight(0, Integer.parseInt(value));
+                    if (currentFP != null)
+                        currentFP.setWeight(0, Integer.parseInt(value));
                     break;
                 case "WEIGHT_EO":
-                    if (currentPane != null)
-                        currentPane.setWeight(1, Integer.parseInt(value));
+                    if (currentFP != null)
+                        currentFP.setWeight(1, Integer.parseInt(value));
                     break;
                 case "WEIGHT_EQ":
-                    if (currentPane != null)
-                        currentPane.setWeight(2, Integer.parseInt(value));
+                    if (currentFP != null)
+                        currentFP.setWeight(2, Integer.parseInt(value));
                     break;
                 case "WEIGHT_ILF":
-                    if (currentPane != null)
-                        currentPane.setWeight(3, Integer.parseInt(value));
+                    if (currentFP != null)
+                        currentFP.setWeight(3, Integer.parseInt(value));
                     break;
                 case "WEIGHT_EIF":
-                    if (currentPane != null)
-                        currentPane.setWeight(4, Integer.parseInt(value));
+                    if (currentFP != null)
+                        currentFP.setWeight(4, Integer.parseInt(value));
                     break;
-
-                // VAF values
                 case "VAF":
-                    if (currentPane != null) {
+                    if (currentFP != null) {
                         String[] vafParts = value.split(",");
                         for (int i = 0; i < vafParts.length; i++) {
-                            currentPane.setVafValue(i,
+                            currentFP.setVafValue(i,
                                     Integer.parseInt(vafParts[i].trim()));
                         }
                     }
                     break;
-
-                // FP result
                 case "FP_RESULT":
-                    if (currentPane != null) {
+                    if (currentFP != null) {
                         double fp = Double.parseDouble(value);
-                        currentPane.computeFunctionPoints();
-                        // Override with saved value in case of rounding
-                        if (fp > 0) currentPane.setFunctionPoints(fp);
+                        currentFP.computeFunctionPoints();
+                        if (fp > 0) currentFP.setFunctionPoints(fp);
                     }
+                    break;
+                case "CODE_SIZE":
+                    if (currentFP != null){
+                        double codeSize = Double.parseDouble(value);
+                        currentFP.setCodeSize(codeSize);
+                    }
+                    break;
+
+                // --- UCP pane start ---
+                case "UCP_PANE":
+                    currentUCP = new UseCasePointData(value);
+                    currentFP  = null;
+                    ucpPanes.add(currentUCP);
+                    break;
+
+                // --- UCP fields ---
+                case "SIMPLE_UC":
+                    if (currentUCP != null)
+                        currentUCP.setSimpleUseCases(Integer.parseInt(value));
+                    break;
+                case "AVERAGE_UC":
+                    if (currentUCP != null)
+                        currentUCP.setAverageUseCases(Integer.parseInt(value));
+                    break;
+                case "COMPLEX_UC":
+                    if (currentUCP != null)
+                        currentUCP.setComplexUseCases(Integer.parseInt(value));
+                    break;
+                case "SIMPLE_ACTOR":
+                    if (currentUCP != null)
+                        currentUCP.setSimpleActors(Integer.parseInt(value));
+                    break;
+                case "AVERAGE_ACTOR":
+                    if (currentUCP != null)
+                        currentUCP.setAverageActors(Integer.parseInt(value));
+                    break;
+                case "COMPLEX_ACTOR":
+                    if (currentUCP != null)
+                        currentUCP.setComplexActors(Integer.parseInt(value));
+                    break;
+                case "PROD_FACTOR":
+                    if (currentUCP != null)
+                        currentUCP.setProductivityFactor(
+                                Double.parseDouble(value));
+                    break;
+                case "LOC_PM":
+                    if (currentUCP != null)
+                        currentUCP.setLocPerPM(Double.parseDouble(value));
+                    break;
+                case "LOC_UCP":
+                    if (currentUCP != null)
+                        currentUCP.setLocPerUCP(Double.parseDouble(value));
+                    break;
+                case "TCF_RATINGS":
+                    if (currentUCP != null) {
+                        String[] tcfParts = value.split(",");
+                        for (int i = 0; i < tcfParts.length; i++) {
+                            currentUCP.setTcfRating(i,
+                                    Double.parseDouble(tcfParts[i].trim()));
+                        }
+                    }
+                    break;
+                case "ECF_RATINGS":
+                    if (currentUCP != null) {
+                        String[] ecfParts = value.split(",");
+                        for (int i = 0; i < ecfParts.length; i++) {
+                            currentUCP.setEcfRating(i,
+                                    Double.parseDouble(ecfParts[i].trim()));
+                        }
+                    }
+                    break;
+                case "TOTAL_UCP":
+                    if (currentUCP != null)
+                        currentUCP.computeAll();
                     break;
             }
         }
 
         reader.close();
 
-        // Build and return the project
         Project project = new Project(projectName, productName,
                 creator, comments);
-        for (FunctionPointData pane : panes) {
-            project.addFunctionPointData(pane);
-        }
+        for (FunctionPointData fp   : fpPanes)  project.addFunctionPointData(fp);
+        for (UseCasePointData  ucp  : ucpPanes) project.addUseCasePointData(ucp);
         return project;
     }
 }

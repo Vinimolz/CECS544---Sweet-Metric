@@ -3,6 +3,7 @@ package gui;
 import model.Language;
 import model.FunctionPointData;
 import model.Project;
+import model.UseCasePointData;
 import io.ProjectFileManager;
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -57,7 +58,7 @@ public class MainFrame extends JFrame {
 
         System.out.println("Past null check");
 
-        String paneName = "FP " + (tabbedPane.getTabCount() + 1);
+        String paneName = "FP " + this.language.getSelectedLanguage();
         System.out.println("paneName = " + paneName);
 
         FunctionPointData data = new FunctionPointData(paneName);
@@ -74,6 +75,23 @@ public class MainFrame extends JFrame {
 
         tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
         System.out.println("tab selected");
+    }
+
+    private void addUseCasePointPane() {
+        if (currentProject == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Please create a project first via File -> New.",
+                    "No Project Open",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String paneName = "Test " + (tabbedPane.getTabCount() + 1);
+        UseCasePointData data = new UseCasePointData(paneName);
+        currentProject.addUseCasePointData(data);
+        UseCasePointPanel panel = new UseCasePointPanel(this, data);
+        tabbedPane.addTab(paneName, panel);
+        tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
     }
 
     private void buildMenuBar() {
@@ -115,7 +133,14 @@ public class MainFrame extends JFrame {
         JMenuItem enterFPItem = new JMenuItem("Enter FP Data");
         enterFPItem.addActionListener(e -> addFunctionPointPane());
         fpMenu.add(enterFPItem);
+
+        JMenu ucpMenu = new JMenu("Use Case Points");
+        JMenuItem enterUCPItem = new JMenuItem("Enter UCP Data");
+        enterUCPItem.addActionListener(e -> addUseCasePointPane());
+        ucpMenu.add(enterUCPItem);
+
         metricsMenu.add(fpMenu);
+        metricsMenu.add(ucpMenu);
 
         // Help menu (empty for now)
         JMenu helpMenu = new JMenu("Help");
@@ -218,7 +243,16 @@ public class MainFrame extends JFrame {
                 // Recreate FP panes from loaded data (requirement 4.33)
                 for (FunctionPointData data : currentProject.getFunctionPointDataList()) {
                     FunctionPointPanel panel = new FunctionPointPanel(this, data, language);
-                    panel.populateFromData(); // ← add this line
+                    panel.populateFromData();
+                    tabbedPane.addTab(data.getPaneName(), panel);
+                }
+
+                // Restore UCP panes
+                for (UseCasePointData data :
+                        currentProject.getUseCasePointDataList()) {
+                    UseCasePointPanel panel =
+                            new UseCasePointPanel(this, data);
+                    panel.populateFromData();
                     tabbedPane.addTab(data.getPaneName(), panel);
                 }
 

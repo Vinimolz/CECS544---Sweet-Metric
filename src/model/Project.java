@@ -12,7 +12,7 @@ public class Project {
 
     // Will hold FP pane data later
     private List<FunctionPointData> functionPointDataList = new ArrayList<>();
-
+    private List<UseCasePointData> useCasePointDataList = new ArrayList<>();
     public Project(String projectName, String productName,
                    String creatorName, String comments) {
         this.projectName = projectName;
@@ -34,5 +34,12 @@ public class Project {
 
     public List<FunctionPointData> getFunctionPointDataList() {
         return functionPointDataList;
+    }
+    public void addUseCasePointData(UseCasePointData data) {
+        useCasePointDataList.add(data);
+    }
+
+    public List<UseCasePointData> getUseCasePointDataList() {
+        return useCasePointDataList;
     }
 }

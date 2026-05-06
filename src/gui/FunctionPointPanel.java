@@ -300,6 +300,8 @@ public class FunctionPointPanel extends JPanel {
         // --- VAF sum ---
         vafSumField.setText(String.valueOf(data.getVafSum()));
 
+        codeSizeField.setText(String.valueOf(data.getCodeSize()));
+
         // --- Language label ---
         currentLanguageLabel.setText(language.getDisplayName());
     }
