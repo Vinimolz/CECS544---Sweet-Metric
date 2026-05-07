@@ -10,6 +10,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
+import gui.SMIPanel;
+import model.SMIData;
 
 public class MainFrame extends JFrame {
 
@@ -19,6 +21,7 @@ public class MainFrame extends JFrame {
     private JPanel leftPane;
     private JPanel rightPane;
     private JSplitPane splitPane;
+    private SMIPanel smiPanel = null;
 
     public MainFrame() {
         setTitle("CECS 544 Metrics Suite");
@@ -94,6 +97,29 @@ public class MainFrame extends JFrame {
         tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
     }
 
+    private void addSMIPane() {
+        if (currentProject == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Please create a project first via File -> New.",
+                    "No Project Open",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Only one SMI panel per project
+        if (smiPanel != null) {
+            JOptionPane.showMessageDialog(this,
+                    "An SMI panel already exists for this project.",
+                    "SMI Already Open",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        smiPanel = new SMIPanel(currentProject.getSmiData());
+        tabbedPane.addTab("SMI", smiPanel);
+        tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
+    }
+
     private void buildMenuBar() {
         JMenuBar menuBar = new JMenuBar();
 
@@ -139,6 +165,12 @@ public class MainFrame extends JFrame {
         enterUCPItem.addActionListener(e -> addUseCasePointPane());
         ucpMenu.add(enterUCPItem);
 
+        JMenu smiMenu = new JMenu("SMI");
+        JMenuItem enterSMIItem = new JMenuItem("Software Maturity Index");
+        enterSMIItem.addActionListener(e -> addSMIPane());
+        smiMenu.add(enterSMIItem);
+        metricsMenu.add(smiMenu);
+
         metricsMenu.add(fpMenu);
         metricsMenu.add(ucpMenu);
 
@@ -169,6 +201,7 @@ public class MainFrame extends JFrame {
             rightPane.add(tabbedPane, BorderLayout.CENTER);
             rightPane.revalidate();
             rightPane.repaint();
+            smiPanel = null;
             // Update title bar (requirement 4.37)
             setTitle("CECS 544 Metrics Suite - " + currentProject.getProjectName());
         }
@@ -248,12 +281,16 @@ public class MainFrame extends JFrame {
                 }
 
                 // Restore UCP panes
-                for (UseCasePointData data :
-                        currentProject.getUseCasePointDataList()) {
-                    UseCasePointPanel panel =
-                            new UseCasePointPanel(this, data);
+                for (UseCasePointData data : currentProject.getUseCasePointDataList()) {
+                    UseCasePointPanel panel = new UseCasePointPanel(this, data);
                     panel.populateFromData();
                     tabbedPane.addTab(data.getPaneName(), panel);
+                }
+
+                if (currentProject.getSmiData().getRowCount() > 0) {
+                    smiPanel = new SMIPanel(currentProject.getSmiData());
+                    smiPanel.populateFromData();
+                    tabbedPane.addTab("SMI", smiPanel);
                 }
 
                 rightPane.revalidate();

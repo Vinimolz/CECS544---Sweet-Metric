@@ -3,6 +3,7 @@ package io;
 import model.FunctionPointData;
 import model.Language;
 import model.Project;
+import model.SMIData;
 import model.UseCasePointData;
 
 import java.io.*;
@@ -17,79 +18,135 @@ public class ProjectFileManager {
         BufferedWriter writer = new BufferedWriter(new FileWriter(file));
 
         // Project info
-        writer.write("PROJECT_NAME=" + project.getProjectName()); writer.newLine();
-        writer.write("PRODUCT_NAME=" + project.getProductName()); writer.newLine();
-        writer.write("CREATOR="      + project.getCreatorName()); writer.newLine();
-        writer.write("COMMENTS="     + project.getComments());    writer.newLine();
-        writer.write("LANGUAGE="     + language.getDisplayName()); writer.newLine();
+        writer.write("PROJECT_NAME=" + project.getProjectName());
+        writer.newLine();
+        writer.write("PRODUCT_NAME=" + project.getProductName());
+        writer.newLine();
+        writer.write("CREATOR=" + project.getCreatorName());
+        writer.newLine();
+        writer.write("COMMENTS=" + project.getComments());
+        writer.newLine();
+        writer.write("LANGUAGE=" + language.getDisplayName());
+        writer.newLine();
         writer.newLine();
 
         // Each FP pane
         for (FunctionPointData data : project.getFunctionPointDataList()) {
-            writer.write("PANE="    + data.getPaneName());         writer.newLine();
-            writer.write("EI="      + data.getExternalInputs());   writer.newLine();
-            writer.write("EO="      + data.getExternalOutputs());  writer.newLine();
-            writer.write("EQ="      + data.getExternalInquiries());writer.newLine();
-            writer.write("ILF="     + data.getInternalLogical());  writer.newLine();
-            writer.write("EIF="     + data.getExternalInterface()); writer.newLine();
+            writer.write("PANE=" + data.getPaneName());
+            writer.newLine();
+            writer.write("EI=" + data.getExternalInputs());
+            writer.newLine();
+            writer.write("EO=" + data.getExternalOutputs());
+            writer.newLine();
+            writer.write("EQ=" + data.getExternalInquiries());
+            writer.newLine();
+            writer.write("ILF=" + data.getInternalLogical());
+            writer.newLine();
+            writer.write("EIF=" + data.getExternalInterface());
+            writer.newLine();
 
             // Weighting factors
-            writer.write("WEIGHT_EI="  + data.getWeight(0)); writer.newLine();
-            writer.write("WEIGHT_EO="  + data.getWeight(1)); writer.newLine();
-            writer.write("WEIGHT_EQ="  + data.getWeight(2)); writer.newLine();
-            writer.write("WEIGHT_ILF=" + data.getWeight(3)); writer.newLine();
-            writer.write("WEIGHT_EIF=" + data.getWeight(4)); writer.newLine();
+            writer.write("WEIGHT_EI=" + data.getWeight(0));
+            writer.newLine();
+            writer.write("WEIGHT_EO=" + data.getWeight(1));
+            writer.newLine();
+            writer.write("WEIGHT_EQ=" + data.getWeight(2));
+            writer.newLine();
+            writer.write("WEIGHT_ILF=" + data.getWeight(3));
+            writer.newLine();
+            writer.write("WEIGHT_EIF=" + data.getWeight(4));
+            writer.newLine();
 
             // VAF values as comma separated
             int[] vafs = data.getVafValues();
             StringBuilder vafLine = new StringBuilder("VAF=");
             for (int i = 0; i < vafs.length; i++) {
                 vafLine.append(vafs[i]);
-                if (i < vafs.length - 1) vafLine.append(",");
+                if (i < vafs.length - 1)
+                    vafLine.append(",");
             }
-            writer.write(vafLine.toString()); writer.newLine();
+            writer.write(vafLine.toString());
+            writer.newLine();
 
             // FP result
-            writer.write("FP_RESULT=" + data.getFunctionPoints()); writer.newLine();
-            writer.write("CODE_SIZE=" + data.getCodeSize()); writer.newLine();
+            writer.write("FP_RESULT=" + data.getFunctionPoints());
+            writer.newLine();
+            writer.write("CODE_SIZE=" + data.getCodeSize());
+            writer.newLine();
             writer.newLine(); // blank line between panes
         }
 
         // Save UCP panes
         for (UseCasePointData data : project.getUseCasePointDataList()) {
-            writer.write("UCP_PANE="         + data.getPaneName());       writer.newLine();
-            writer.write("SIMPLE_UC="        + data.getSimpleUseCases()); writer.newLine();
-            writer.write("AVERAGE_UC="       + data.getAverageUseCases());writer.newLine();
-            writer.write("COMPLEX_UC="       + data.getComplexUseCases());writer.newLine();
-            writer.write("SIMPLE_ACTOR="     + data.getSimpleActors());   writer.newLine();
-            writer.write("AVERAGE_ACTOR="    + data.getAverageActors());  writer.newLine();
-            writer.write("COMPLEX_ACTOR="    + data.getComplexActors());  writer.newLine();
-            writer.write("PROD_FACTOR="      + data.getProductivityFactor()); writer.newLine();
-            writer.write("LOC_PM="           + data.getLocPerPM());       writer.newLine();
-            writer.write("LOC_UCP="          + data.getLocPerUCP());      writer.newLine();
+            writer.write("UCP_PANE=" + data.getPaneName());
+            writer.newLine();
+            writer.write("SIMPLE_UC=" + data.getSimpleUseCases());
+            writer.newLine();
+            writer.write("AVERAGE_UC=" + data.getAverageUseCases());
+            writer.newLine();
+            writer.write("COMPLEX_UC=" + data.getComplexUseCases());
+            writer.newLine();
+            writer.write("SIMPLE_ACTOR=" + data.getSimpleActors());
+            writer.newLine();
+            writer.write("AVERAGE_ACTOR=" + data.getAverageActors());
+            writer.newLine();
+            writer.write("COMPLEX_ACTOR=" + data.getComplexActors());
+            writer.newLine();
+            writer.write("PROD_FACTOR=" + data.getProductivityFactor());
+            writer.newLine();
+            writer.write("LOC_PM=" + data.getLocPerPM());
+            writer.newLine();
+            writer.write("LOC_UCP=" + data.getLocPerUCP());
+            writer.newLine();
 
             // TCF ratings as comma separated
             double[] tcf = data.getTcfRatings();
             StringBuilder tcfLine = new StringBuilder("TCF_RATINGS=");
             for (int i = 0; i < tcf.length; i++) {
                 tcfLine.append(tcf[i]);
-                if (i < tcf.length - 1) tcfLine.append(",");
+                if (i < tcf.length - 1)
+                    tcfLine.append(",");
             }
-            writer.write(tcfLine.toString()); writer.newLine();
+            writer.write(tcfLine.toString());
+            writer.newLine();
 
             // ECF ratings as comma separated
             double[] ecf = data.getEcfRatings();
             StringBuilder ecfLine = new StringBuilder("ECF_RATINGS=");
             for (int i = 0; i < ecf.length; i++) {
                 ecfLine.append(ecf[i]);
-                if (i < ecf.length - 1) ecfLine.append(",");
+                if (i < ecf.length - 1)
+                    ecfLine.append(",");
             }
-            writer.write(ecfLine.toString()); writer.newLine();
+            writer.write(ecfLine.toString());
+            writer.newLine();
 
-            writer.write("TOTAL_UCP="   + data.getTotalUCP());        writer.newLine();
-            writer.write("EST_HOURS="   + data.getEstimatedHours());  writer.newLine();
-            writer.write("EST_LOC="     + data.getEstimatedLOC());    writer.newLine();
-            writer.write("EST_PM="      + data.getEstimatedPM());     writer.newLine();
+            writer.write("TOTAL_UCP=" + data.getTotalUCP());
+            writer.newLine();
+            writer.write("EST_HOURS=" + data.getEstimatedHours());
+            writer.newLine();
+            writer.write("EST_LOC=" + data.getEstimatedLOC());
+            writer.newLine();
+            writer.write("EST_PM=" + data.getEstimatedPM());
+            writer.newLine();
+            writer.newLine();
+        }
+
+        // Save SMI data
+        SMIData smiData = project.getSmiData();
+        if (smiData.getRowCount() > 0) {
+            writer.write("SMI_ROWS=" + smiData.getRowCount());
+            writer.newLine();
+            for (int i = 0; i < smiData.getRowCount(); i++) {
+                SMIData.SMIRow row = smiData.getRow(i);
+                writer.write("SMI_ROW=" + i
+                        + "," + row.getModulesAdded()
+                        + "," + row.getModulesChanged()
+                        + "," + row.getModulesDeleted()
+                        + "," + row.getTotalModules()
+                        + "," + row.getSmi());
+                writer.newLine();
+            }
             writer.newLine();
         }
 
@@ -100,35 +157,45 @@ public class ProjectFileManager {
     public static Project loadProject(File file, Language language)
             throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(file));
-
+        SMIData smiData = new SMIData();
         String projectName = "";
         String productName = "";
-        String creator     = "";
-        String comments    = "";
+        String creator = "";
+        String comments = "";
 
-        List<FunctionPointData>  fpPanes  = new ArrayList<>();
-        List<UseCasePointData>   ucpPanes = new ArrayList<>();
+        List<FunctionPointData> fpPanes = new ArrayList<>();
+        List<UseCasePointData> ucpPanes = new ArrayList<>();
 
-        FunctionPointData  currentFP  = null;
-        UseCasePointData   currentUCP = null;
+        FunctionPointData currentFP = null;
+        UseCasePointData currentUCP = null;
 
         String line;
         while ((line = reader.readLine()) != null) {
             line = line.trim();
-            if (line.isEmpty()) continue;
+            if (line.isEmpty())
+                continue;
 
             String[] parts = line.split("=", 2);
-            if (parts.length < 2) continue;
+            if (parts.length < 2)
+                continue;
 
-            String key   = parts[0].trim();
+            String key = parts[0].trim();
             String value = parts[1].trim();
 
             switch (key) {
                 // --- Project level ---
-                case "PROJECT_NAME": projectName = value; break;
-                case "PRODUCT_NAME": productName = value; break;
-                case "CREATOR":      creator     = value; break;
-                case "COMMENTS":     comments    = value; break;
+                case "PROJECT_NAME":
+                    projectName = value;
+                    break;
+                case "PRODUCT_NAME":
+                    productName = value;
+                    break;
+                case "CREATOR":
+                    creator = value;
+                    break;
+                case "COMMENTS":
+                    comments = value;
+                    break;
                 case "LANGUAGE":
                     if (!value.equals("None")) {
                         language.setSelectedLanguage(value);
@@ -137,7 +204,7 @@ public class ProjectFileManager {
 
                 // --- FP pane start ---
                 case "PANE":
-                    currentFP  = new FunctionPointData(value);
+                    currentFP = new FunctionPointData(value);
                     currentUCP = null;
                     fpPanes.add(currentFP);
                     break;
@@ -196,11 +263,12 @@ public class ProjectFileManager {
                     if (currentFP != null) {
                         double fp = Double.parseDouble(value);
                         currentFP.computeFunctionPoints();
-                        if (fp > 0) currentFP.setFunctionPoints(fp);
+                        if (fp > 0)
+                            currentFP.setFunctionPoints(fp);
                     }
                     break;
                 case "CODE_SIZE":
-                    if (currentFP != null){
+                    if (currentFP != null) {
                         double codeSize = Double.parseDouble(value);
                         currentFP.setCodeSize(codeSize);
                     }
@@ -209,7 +277,7 @@ public class ProjectFileManager {
                 // --- UCP pane start ---
                 case "UCP_PANE":
                     currentUCP = new UseCasePointData(value);
-                    currentFP  = null;
+                    currentFP = null;
                     ucpPanes.add(currentUCP);
                     break;
 
@@ -273,6 +341,18 @@ public class ProjectFileManager {
                     if (currentUCP != null)
                         currentUCP.computeAll();
                     break;
+                case "SMI_ROW":
+                    String[] smiParts = value.split(",");
+                    if (smiParts.length == 6) {
+                        SMIData.SMIRow smiRow = new SMIData.SMIRow(
+                                Integer.parseInt(smiParts[1].trim()),
+                                Integer.parseInt(smiParts[2].trim()),
+                                Integer.parseInt(smiParts[3].trim()));
+                        smiRow.setTotalModules(Integer.parseInt(smiParts[4].trim()));
+                        smiRow.setSmi(Double.parseDouble(smiParts[5].trim()));
+                        smiData.addRow(smiRow); // use local variable, not project
+                    }
+                    break;
             }
         }
 
@@ -280,8 +360,12 @@ public class ProjectFileManager {
 
         Project project = new Project(projectName, productName,
                 creator, comments);
-        for (FunctionPointData fp   : fpPanes)  project.addFunctionPointData(fp);
-        for (UseCasePointData  ucp  : ucpPanes) project.addUseCasePointData(ucp);
+        for (FunctionPointData fp : fpPanes)
+            project.addFunctionPointData(fp);
+        for (UseCasePointData ucp : ucpPanes)
+            project.addUseCasePointData(ucp);
+        project.setSmiData(smiData);
+
         return project;
     }
 }
