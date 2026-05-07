@@ -22,6 +22,8 @@ public class MainFrame extends JFrame {
     private SMIPanel smiPanel = null;
     private boolean hasUnsavedChanges = false;
 
+    private JMenu metricsMenu;
+
     public MainFrame() {
         setTitle("CECS 544 Metrics Suite");
         setSize(900, 600);
@@ -166,7 +168,8 @@ public class MainFrame extends JFrame {
         preferencesMenu.add(languageItem);
 
         // Metrics menu
-        JMenu metricsMenu = new JMenu("Metrics");
+        metricsMenu = new JMenu("Metrics");
+        metricsMenu.setEnabled(false);
         JMenu fpMenu = new JMenu("Function Points");
         JMenuItem enterFPItem = new JMenuItem("Enter FP Data");
         enterFPItem.addActionListener(e -> addFunctionPointPane());
@@ -214,11 +217,12 @@ public class MainFrame extends JFrame {
             rightPane.revalidate();
             rightPane.repaint();
             smiPanel = null;
+            metricsMenu.setEnabled(true);
             // Update title bar (requirement 4.37)
             setTitle("CECS 544 Metrics Suite - " + currentProject.getProjectName());
-        }
+            markUnsaved();
 
-        markUnsaved();
+        }
     }
 
     private void openLanguageDialog() {
@@ -314,6 +318,8 @@ public class MainFrame extends JFrame {
                 // Update title bar
                 setTitle("CECS 544 Metrics Suite - " +
                         currentProject.getProjectName());
+
+                metricsMenu.setEnabled(true);
 
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(this,
