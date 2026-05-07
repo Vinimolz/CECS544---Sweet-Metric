@@ -10,8 +10,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
-import gui.SMIPanel;
-import model.SMIData;
 
 public class MainFrame extends JFrame {
 
@@ -22,10 +20,18 @@ public class MainFrame extends JFrame {
     private JPanel rightPane;
     private JSplitPane splitPane;
     private SMIPanel smiPanel = null;
+    private boolean hasUnsavedChanges = false;
 
     public MainFrame() {
         setTitle("CECS 544 Metrics Suite");
         setSize(900, 600);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                handleExit();
+            }
+        });
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null); // centers the window on screen
         buildMenuBar();
@@ -78,6 +84,8 @@ public class MainFrame extends JFrame {
 
         tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
         System.out.println("tab selected");
+
+        markUnsaved();
     }
 
     private void addUseCasePointPane() {
@@ -95,6 +103,8 @@ public class MainFrame extends JFrame {
         UseCasePointPanel panel = new UseCasePointPanel(this, data);
         tabbedPane.addTab(paneName, panel);
         tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
+
+        markUnsaved();
     }
 
     private void addSMIPane() {
@@ -118,6 +128,8 @@ public class MainFrame extends JFrame {
         smiPanel = new SMIPanel(currentProject.getSmiData());
         tabbedPane.addTab("SMI", smiPanel);
         tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
+
+        markUnsaved();
     }
 
     private void buildMenuBar() {
@@ -136,7 +148,7 @@ public class MainFrame extends JFrame {
         saveItem.addActionListener(e -> saveProject());
 
         JMenuItem exitItem = new JMenuItem("Exit");
-        exitItem.addActionListener(e -> System.exit(0));
+        exitItem.addActionListener(e -> handleExit());
 
         fileMenu.add(newItem);
         fileMenu.add(openItem);
@@ -205,6 +217,8 @@ public class MainFrame extends JFrame {
             // Update title bar (requirement 4.37)
             setTitle("CECS 544 Metrics Suite - " + currentProject.getProjectName());
         }
+
+        markUnsaved();
     }
 
     private void openLanguageDialog() {
@@ -244,6 +258,7 @@ public class MainFrame extends JFrame {
                         "Project saved successfully!",
                         "Saved",
                         JOptionPane.INFORMATION_MESSAGE);
+                hasUnsavedChanges = false;
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(this,
                         "Error saving project: " + e.getMessage(),
@@ -306,6 +321,36 @@ public class MainFrame extends JFrame {
                         "Open Error",
                         JOptionPane.ERROR_MESSAGE);
             }
+        }
+    }
+
+    public void markUnsaved() {
+        hasUnsavedChanges = true;
+    }
+
+    private void handleExit() {
+        if (hasUnsavedChanges) {
+            int choice = JOptionPane.showOptionDialog(
+                    this,
+                    "You have unsaved changes. What would you like to do?",
+                    "Unsaved Changes",
+                    JOptionPane.YES_NO_CANCEL_OPTION,
+                    JOptionPane.WARNING_MESSAGE,
+                    null,
+                    new String[] { "Save", "Discard Changes", "Cancel" },
+                    "Save");
+
+            if (choice == 0) {
+                // Save then exit
+                saveProject();
+                System.exit(0);
+            } else if (choice == 1) {
+                // Discard and exit
+                System.exit(0);
+            }
+            // Cancel (choice == 2 or dialog closed) — do nothing, return to app
+        } else {
+            System.exit(0);
         }
     }
 }
